@@ -1,0 +1,17 @@
+**/node_modules
+**/.next
+**/coverage
+**/dist
+**/build
+.git
+.github
+*.log
+npm-debug.log*
+**/.env
+**/.env.*
+!**/.env.example
+**/uploads
+**/dump*.sql
+**/*.db
+**/*.sqlite
+**/.DS_Store

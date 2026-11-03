@@ -1,0 +1,31 @@
+{
+  "root": true,
+  "env": {
+    "node": true,
+    "es2022": true,
+    "jest": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "script"
+  },
+  "extends": ["eslint:recommended", "prettier"],
+  "rules": {
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+    "no-console": "off",
+    "no-var": "error",
+    "prefer-const": "error",
+    "eqeqeq": ["error", "smart"],
+    "no-return-await": "error",
+    "no-throw-literal": "error"
+  },
+  "ignorePatterns": ["node_modules/", "client/", "coverage/", "server/prisma/migrations/"],
+  "overrides": [
+    {
+      "files": ["server/tests/**/*.js"],
+      "parserOptions": {
+        "sourceType": "module"
+      }
+    }
+  ]
+}

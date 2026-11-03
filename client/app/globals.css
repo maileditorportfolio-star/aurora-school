@@ -1,0 +1,153 @@
+@import 'tailwindcss';
+
+/* Design tokens (colors, fonts, shadows, animations) live in the legacy
+   JavaScript config so they stay in one place. */
+@config '../tailwind.config.js';
+
+/* Tailwind v4 scans sources automatically, but the legacy config's `content`
+   list is ignored, so the scan roots are declared explicitly. */
+@source '../app/**/*.{ts,tsx}';
+@source '../components/**/*.{ts,tsx}';
+@source '../lib/**/*.{ts,tsx}';
+@source '../store/**/*.{ts,tsx}';
+
+/* Tailwind v4 has no theme namespace for background sizes, so the grid
+   background size is declared as a first-class utility. */
+@utility bg-grid {
+  background-size: 44px 44px;
+}
+
+@layer base {
+  :root {
+    --header-height: 4.5rem;
+  }
+
+  * {
+    @apply border-ink-200;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-frost text-ink-900 antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  ::selection {
+    @apply bg-brand-600/90 text-white;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-ink-50;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-ink-300;
+    border: 2px solid rgb(255 255 255 / 1);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-brand-400;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-brand-500 via-cyan-400 to-signal-500 bg-clip-text text-transparent;
+    background-size: 200% auto;
+  }
+
+  .text-gradient-light {
+    @apply bg-gradient-to-r from-brand-300 via-cyan-200 to-signal-300 bg-clip-text text-transparent;
+    background-size: 200% auto;
+  }
+
+  .glass {
+    @apply border border-white/60 bg-white/70 backdrop-blur-xl;
+  }
+
+  .glass-dark {
+    @apply border border-white/10 bg-white/[0.055] backdrop-blur-xl;
+  }
+
+  .focus-ring {
+    @apply outline-none ring-offset-2 ring-offset-white focus-visible:ring-2 focus-visible:ring-brand-500;
+  }
+
+  .skeleton {
+    @apply relative overflow-hidden bg-ink-100;
+  }
+
+  .skeleton::after {
+    @apply absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/70 to-transparent;
+    content: '';
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  @media print {
+    body {
+      background: #fff !important;
+      color: #000 !important;
+    }
+
+    aside,
+    header,
+    footer {
+      display: none !important;
+    }
+
+    main {
+      width: 100% !important;
+    }
+
+    * {
+      box-shadow: none !important;
+      text-shadow: none !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
+}

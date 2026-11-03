@@ -1,0 +1,15 @@
+# Normalize line endings so diffs are stable across Windows and Unix.
+* text=auto eol=lf
+
+# Keep binary assets intact.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+
+# Lockfiles are generated — keep them out of diff noise.
+package-lock.json -diff
