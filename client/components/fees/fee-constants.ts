@@ -14,4 +14,17 @@ export const FREQ_LABEL: Record<FeeStructure['frequency'], string> = {
   ONE_TIME: 'One-time',
 };
 
-export const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+export const MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
