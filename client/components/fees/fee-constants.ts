@@ -1,10 +1,4 @@
-import { cn } from '@/lib/utils';
-import { formatCurrency } from '@/lib/utils';
-import type { FeeInvoice, FeeStructure, SchoolClass } from '@/types';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Modal } from '@/components/ui/modal';
-import { BadgePercent, Receipt, Printer } from 'lucide-react';
+import type { FeeInvoice, FeeStructure } from '@/types';
 
 export const STATUS_STYLES: Record<FeeInvoice['status'], string> = {
   PENDING: 'bg-signal-100 text-signal-800',
@@ -21,5 +15,3 @@ export const FREQ_LABEL: Record<FeeStructure['frequency'], string> = {
 };
 
 export const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-EOF
-echo written

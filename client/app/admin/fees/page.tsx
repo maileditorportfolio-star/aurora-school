@@ -21,37 +21,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Modal } from '@/components/ui/modal';
 import { cn, formatCurrency, formatDate } from '@/lib/utils';
-
 type Tab = 'structures' | 'invoices' | 'generate';
 
-const STATUS_STYLES: Record<FeeInvoice['status'], string> = {
-  PENDING: 'bg-signal-100 text-signal-800',
-  PARTIAL: 'bg-orange-100 text-orange-800',
-  PAID: 'bg-emerald-50 text-emerald-700',
-  OVERDUE: 'bg-rose-100 text-rose-700',
-  WAIVED: 'bg-ink-100 text-ink-500',
-};
-
-const FREQ_LABEL: Record<FeeStructure['frequency'], string> = {
-  MONTHLY: 'Monthly',
-  ANNUAL: 'Annual',
-  ONE_TIME: 'One-time',
-};
-
-const MONTHS = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
+import { STATUS_STYLES, FREQ_LABEL, MONTHS } from '@/components/fees/fee-constants';
 
 export default function FeesPage() {
   const [tab, setTab] = useState<Tab>('invoices');
