@@ -19,7 +19,8 @@ const mulberry32 = (seed) => () => {
 };
 const random = mulberry32(20261103);
 
-const PASSWORD = 'aurora123';
+const PASSWORD = process.env.SEED_DEMO_PASSWORD || (process.env.NODE_ENV === 'production' ? '' : 'aurora123');
+if (!PASSWORD) throw new Error('SEED_DEMO_PASSWORD must be set in production');
 
 const SUBJECTS = [
   { name: 'Bangla', code: 'BAN101' },

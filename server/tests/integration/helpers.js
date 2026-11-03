@@ -9,7 +9,9 @@ export const prisma = nodeRequire('../../src/config/prisma.js');
 export const uniqueSuffix = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
 /** Registers nothing — integration specs log in with seeded accounts. */
-export const signIn = async (email, password = 'aurora123') => {
+const DEMO_PASSWORD = process.env.SEED_DEMO_PASSWORD || 'aurora123';
+
+export const signIn = async (email, password = DEMO_PASSWORD) => {
   const res = await request(app).post('/api/auth/login').send({ email, password });
   if (res.status !== 200) {
     throw new Error(`Login failed for ${email}: ${res.status} ${JSON.stringify(res.body)}`);
