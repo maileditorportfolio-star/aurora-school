@@ -1,0 +1,422 @@
+        {/* Tabs */}
+        <div
+          className="flex flex-wrap gap-1 rounded-2xl border border-ink-100 bg-white p-1 shadow-soft"
+          role="tablist"
+          aria-label="Fee views"
+        >
+          {(
+            [
+              { id: 'invoices', label: 'Invoices' },
+              { id: 'structures', label: 'Fee structures' },
+              { id: 'generate', label: 'Bulk generate' },
+            ] as Array<{ id: Tab; label: string }>
+          ).map((item) => (
+            <button
+              key={item.id}
+              role="tab"
+              aria-selected={tab === item.id}
+              onClick={() => setTab(item.id)}
+              className={cn(
+                'rounded-xl px-4 py-2 text-xs font-semibold transition',
+                tab === item.id ? 'bg-brand-700 text-white' : 'text-ink-500 hover:text-brand-800',
+              )}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        {error && (
+          <p
+            role="alert"
+            className="flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-medium text-rose-700"
+          >
+            <AlertCircle className="h-4 w-4" aria-hidden />
+            {error}
+          </p>
+        )}
+        {message && (
+          <p
+            role="status"
+            className="flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-medium text-emerald-800"
+          >
+            <CheckCircle2 className="h-4 w-4" aria-hidden />
+            {message}
+          </p>
+        )}
+
+        {/* ---------- Invoices tab ---------- */}
+        {tab === 'invoices' && (
+          <>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="relative min-w-0 flex-1 sm:min-w-56">
+                <Search
+                  className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400"
+                  aria-hidden
+                />
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search invoice, student, admission no…"
+                  aria-label="Search invoices"
+                  className="h-11 w-full rounded-2xl border border-ink-200 bg-white ps-10 pe-3 text-sm outline-none focus:border-brand-500"
+                />
+              </div>
+              <select
+                value={status}
+                onChange={(e) => {
+                  setStatus(e.target.value);
+                  setPagination((p) => ({ ...p, page: 1 }));
+                }}
+                aria-label="Filter by status"
+                className="h-11 rounded-2xl border border-ink-200 bg-white px-3 text-sm outline-none"
+              >
+                <option value="">All statuses</option>
+                <option value="PENDING">Pending</option>
+                <option value="PARTIAL">Partial</option>
+                <option value="PAID">Paid</option>
+                <option value="WAIVED">Waived</option>
+              </select>
+              <select
+                value={sectionId}
+                onChange={(e) => {
+                  setSectionId(e.target.value);
+                  setPagination((p) => ({ ...p, page: 1 }));
+                }}
+                aria-label="Filter by section"
+                className="h-11 rounded-2xl border border-ink-200 bg-white px-3 text-sm outline-none"
+              >
+                <option value="">All sections</option>
+                {sections.map((section) => (
+                  <option key={section.id} value={section.id}>
+                    {section.label}
+                  </option>
+                ))}
+              </select>
+              <Button size="sm" variant="outline" onClick={exportCsv}>
+                CSV
+              </Button>
+            </div>
+
+            <Panel>
+              {loading ? (
+                <div className="space-y-2">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="h-12 animate-pulse rounded-2xl bg-ink-100" />
+                  ))}
+                </div>
+              ) : visibleInvoices.length === 0 ? (
+                <EmptyState
+                  icon={Receipt}
+                  title="No invoices"
+                  hint="Generate invoices from a fee structure, or adjust the filters."
+                />
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[820px] text-sm">
+                    <thead>
+                      <tr className="text-left text-[10px] uppercase tracking-[0.18em] text-ink-400">
+                        <th className="pb-3 pe-3">Invoice</th>
+                        <th className="pb-3 pe-3">Student</th>
+                        <th className="pb-3 pe-3">Title</th>
+                        <th className="pb-3 pe-3 text-right">Amount</th>
+                        <th className="pb-3 pe-3 text-right">Balance</th>
+                        <th className="pb-3 pe-3">Due</th>
+                        <th className="pb-3 pe-3">Status</th>
+                        <th className="pb-3 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-ink-100">
+                      {visibleInvoices.map((invoice) => {
+                        const balance = invoice.amount - invoice.paidAmount;
+                        return (
+                          <tr key={invoice.id}>
+                            <td className="py-2.5 pe-3 font-mono text-xs text-ink-500">
+                              {invoice.invoiceNo}
+                            </td>
+                            <td className="py-2.5 pe-3">
+                              <p className="font-semibold text-ink-800">
+                                {invoice.student
+                                  ? `${invoice.student.firstName} ${invoice.student.lastName}`
+                                  : '—'}
+                              </p>
+                              <p className="font-mono text-[10px] text-ink-400">
+                                {invoice.student?.admissionNo ?? ''}
+                              </p>
+                            </td>
+                            <td
+                              className="py-2.5 pe-3 max-w-48 truncate text-ink-600"
+                              title={invoice.title}
+                            >
+                              {invoice.title}
+                            </td>
+                            <td className="py-2.5 pe-3 text-right tabular-nums">
+                              {formatCurrency(invoice.amount)}
+                            </td>
+                            <td className="py-2.5 pe-3 text-right font-semibold tabular-nums">
+                              {formatCurrency(balance)}
+                            </td>
+                            <td className="py-2.5 pe-3 text-ink-500">
+                              {formatDate(invoice.dueDate)}
+                            </td>
+                            <td className="py-2.5 pe-3">
+                              <span
+                                className={cn(
+                                  'rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider',
+                                  STATUS_STYLES[invoice.status],
+                                  invoice.isOverdue && 'bg-rose-100 text-rose-700',
+                                )}
+                              >
+                                {invoice.isOverdue ? 'Overdue' : invoice.status}
+                              </span>
+                            </td>
+                            <td className="py-2.5 text-right">
+                              <div className="flex justify-end gap-1">
+                                {invoice.status !== 'PAID' && invoice.status !== 'WAIVED' && (
+                                  <button
+                                    onClick={() => openPayment(invoice)}
+                                    aria-label="Record payment"
+                                    title="Record payment"
+                                    className="grid h-8 w-8 place-items-center rounded-lg text-ink-400 transition hover:bg-emerald-50 hover:text-emerald-700"
+                                  >
+                                    <Receipt className="h-4 w-4" />
+                                  </button>
+                                )}
+                                {invoice.status !== 'PAID' && invoice.status !== 'WAIVED' && (
+                                  <button
+                                    onClick={() => waive(invoice)}
+                                    aria-label="Waive invoice"
+                                    title="Waive"
+                                    className="grid h-8 w-8 place-items-center rounded-lg text-ink-400 transition hover:bg-signal-50 hover:text-signal-700"
+                                  >
+                                    <Ban className="h-4 w-4" />
+                                  </button>
+                                )}
+                                {invoice.status === 'PAID' && (
+                                  <button
+                                    onClick={() => setReceiptInvoice(invoice)}
+                                    aria-label="View receipt"
+                                    title="View receipt"
+                                    className="grid h-8 w-8 place-items-center rounded-lg text-ink-400 transition hover:bg-brand-50 hover:text-brand-700"
+                                  >
+                                    <Printer className="h-4 w-4" />
+                                  </button>
+                                )}
+                                {invoice.payments?.length === 0 && invoice.paidAmount === 0 && (
+                                  <button
+                                    onClick={() => removeInvoice(invoice)}
+                                    aria-label="Delete invoice"
+                                    title="Delete"
+                                    className="grid h-8 w-8 place-items-center rounded-lg text-ink-400 transition hover:bg-rose-50 hover:text-rose-600"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {pagination.pages > 1 && (
+                <div className="mt-4 flex items-center justify-between border-t border-ink-100 pt-4 text-xs text-ink-500">
+                  <span>
+                    {pagination.total} invoices · page {pagination.page} of {pagination.pages}
+                  </span>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={pagination.page <= 1}
+                      onClick={() => setPagination((p) => ({ ...p, page: p.page - 1 }))}
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={pagination.page >= pagination.pages}
+                      onClick={() => setPagination((p) => ({ ...p, page: p.page + 1 }))}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </Panel>
+          </>
+        )}
+
+        {/* ---------- Structures tab ---------- */}
+        {tab === 'structures' && (
+          <>
+            <div className="flex justify-end">
+              <Button size="sm" onClick={() => openStructureForm()}>
+                <Plus className="h-4 w-4" />
+                New structure
+              </Button>
+            </div>
+            {structures.length === 0 ? (
+              <EmptyState
+                icon={BadgePercent}
+                title="No fee structures"
+                hint="Create Tuition, Development, Admission or Exam fees first."
+              />
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2">
+                {structures.map((structure) => (
+                  <div
+                    key={structure.id}
+                    className="flex flex-col rounded-3xl border border-ink-100 bg-white p-5 shadow-soft"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <span className="rounded-full bg-brand-50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-800">
+                          {FREQ_LABEL[structure.frequency]}
+                        </span>
+                        <h3 className="mt-2 font-display text-lg font-semibold text-brand-950">
+                          {structure.name}
+                        </h3>
+                        <p className="text-[11px] text-ink-400">
+                          {structure.schoolClass ? structure.schoolClass.name : 'All classes'}
+                          {structure.dueDay ? ` · due day ${structure.dueDay}` : ''} ·{' '}
+                          {structure._count?.invoices ?? 0} invoices issued
+                        </p>
+                      </div>
+                      <p className="font-display text-2xl font-semibold text-brand-900">
+                        {formatCurrency(structure.amount)}
+                      </p>
+                    </div>
+                    <div className="mt-4 flex justify-end gap-2 border-t border-ink-100 pt-4">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => openStructureForm(structure)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          if (
+                            confirm(
+                              `Delete “${structure.name}”? Existing invoices keep their reference removed.`,
+                            )
+                          ) {
+                            api.fees.removeStructure(structure.id).then(loadStructures);
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ---------- Generate tab ---------- */}
+        {tab === 'generate' && (
+          <Panel title="Generate invoices in bulk">
+            <form onSubmit={generate} className="grid max-w-2xl gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label
+                  htmlFor="structure"
+                  className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-ink-500"
+                >
+                  Fee structure
+                </label>
+                <select
+                  id="structure"
+                  value={genForm.structureId}
+                  onChange={(e) => setGenForm({ ...genForm, structureId: e.target.value })}
+                  className="h-12 w-full rounded-2xl border border-ink-200 bg-white px-4 text-sm outline-none focus:border-brand-500"
+                  required
+                >
+                  <option value="">Select a structure…</option>
+                  {structures.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} — {formatCurrency(s.amount)} ({FREQ_LABEL[s.frequency]})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {selectedStructure?.frequency === 'MONTHLY' && (
+                <>
+                  <div>
+                    <label
+                      htmlFor="gen-month"
+                      className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-ink-500"
+                    >
+                      Month
+                    </label>
+                    <select
+                      id="gen-month"
+                      value={genForm.month}
+                      onChange={(e) => setGenForm({ ...genForm, month: e.target.value })}
+                      className="h-12 w-full rounded-2xl border border-ink-200 bg-white px-4 text-sm outline-none focus:border-brand-500"
+                    >
+                      {MONTHS.map((label, index) => (
+                        <option key={label} value={index + 1}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <Input
+                    label="Year"
+                    type="number"
+                    value={genForm.year}
+                    onChange={(e) => setGenForm({ ...genForm, year: e.target.value })}
+                  />
+                </>
+              )}
+              <div>
+                <label
+                  htmlFor="gen-section"
+                  className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-ink-500"
+                >
+                  Limit to section (optional)
+                </label>
+                <select
+                  id="gen-section"
+                  value={genForm.sectionId}
+                  onChange={(e) => setGenForm({ ...genForm, sectionId: e.target.value })}
+                  className="h-12 w-full rounded-2xl border border-ink-200 bg-white px-4 text-sm outline-none focus:border-brand-500"
+                >
+                  <option value="">Everyone matching the structure</option>
+                  {sections.map((section) => (
+                    <option key={section.id} value={section.id}>
+                      {section.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="sm:col-span-2 flex flex-wrap items-center justify-between gap-3 border-t border-ink-100 pt-4">
+                <p className="max-w-md text-[11px] leading-5 text-ink-400">
+                  Creates one invoice per active student. Students already billed for the same
+                  structure and month/year are skipped automatically.
+                </p>
+                <Button type="submit" disabled={!genForm.structureId}>
+                  <Wand2 className="h-4 w-4" />
+                  Generate
+                </Button>
+              </div>
+              {genResult && (
+                <p
+                  role="status"
+                  className="sm:col-span-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-medium text-emerald-800"
+                >
+                  {genResult}
+                </p>
+              )}
+            </form>
+          </Panel>
+        )}
