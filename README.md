@@ -51,6 +51,21 @@ npm run verify:full  # verify + audit + production build
 npm run test:integration  # needs a live, seeded MySQL (aurora_school)
 ```
 
+Coverage is enforced in CI via `test.coverage.thresholds`:
+
+- Server (`server/vitest.config.js`): statements 82, branches 60, functions 78, lines 85.
+- Client (`client/vitest.config.ts`): minimal suite (12 specs).
+
+### Docker
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+The compose file spins up MySQL, the API (port 4000) and the storefront (port 3000).
+Migrations run automatically on first boot via `prisma migrate deploy`.
+
 ## Repository layout
 
 ```
